@@ -30,7 +30,7 @@ pipeline {
         }
         stage ('Docker_Push') {
             steps {
-                    withCredentials([usernamePassword(credentialsId: 'dockerHub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
                         sh'''
                         IMAGE="k8s-debian-test"
 
