@@ -3,7 +3,7 @@ pipeline {
     IMAGE = "rjhaikal/k8s-debian-test"
     registryCredential = 'dockerhub'
     dockerImage = ''
-    ARGOCD_SERVER="10.233.1.15"
+    ARGOCD_SERVER="192.168.3.52"
     APP_NAME="debian-test-k8s"
     }
     agent any
