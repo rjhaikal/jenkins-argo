@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: debian-test
-        image: rjhaikal/k8s-debian-test:latest 
+        image: registry.hub.docker.com/rjhaikal/k8s-debian-test:latest 
         imagePullPolicy: Always
         resources:
           requests:

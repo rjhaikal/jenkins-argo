@@ -40,14 +40,14 @@ pipeline {
              steps {
                      // withCredentials([string(credentialsId: "argocd-deploy-role", variable: 'ARGOCD_AUTH_TOKEN')]) {
                         sh '''
-                        argocd login --insecure $ARGOCD_SERVER --auth-token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJwcm9qOmRlZmF1bHQ6amVua2lucy1kZXBsb3ktcm9sZSIsIm5iZiI6MTY1NjgyNzUyNiwiaWF0IjoxNjU2ODI3NTI2LCJqdGkiOiI1ZjcyZTJiMS0zZjQ5LTQxNjMtYWFiZi01NDAwZmRmNTA3MDcifQ.9HciKVLmvweUOM73t6j-UX0uhOLil9qXiADGhrYP0kk --username admin --password openstack
+                        argocd login --insecure $ARGOCD_SERVER --username admin --password openstack
                         ARGOCD_SERVER=$ARGOCD_SERVER argocd app create $APP_NAME --project default --repo https://github.com/rjhaikal/jenkins-argo.git --path ./ --dest-namespace default --dest-server https://kubernetes.default.svc
                         IMAGE_DIGEST=$(docker image inspect $IMAGE:latest -f '{{join .RepoDigests ","}}')
                         ## Customize image 
                         ARGOCD_SERVER=$ARGOCD_SERVER argocd --grpc-web app set $APP_NAME --kustomize-image $IMAGE_DIGEST
                         
                         # Deploy to ArgoCD
-                        ARGOCD_SERVER=$ARGOCD_SERVER argocd --grpc-web app sync $APP_NAME --force
+                        ARGOCD_SERVER=$ARGOCD_SERVER argocd --grpc-web app sync $APP_NAME --force 
                         ARGOCD_SERVER=$ARGOCD_SERVER argocd --grpc-web app wait $APP_NAME --timeout 600
                         '''
                }
