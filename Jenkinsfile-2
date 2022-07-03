@@ -41,7 +41,7 @@ pipeline {
                      // withCredentials([string(credentialsId: "argocd-deploy-role", variable: 'ARGOCD_AUTH_TOKEN')]) {
                         sh '''
                         argocd login --insecure $ARGOCD_SERVER --username admin --password openstack
-                        ARGOCD_SERVER=$ARGOCD_SERVER argocd app create $APP_NAME --project default --repo https://github.com/rjhaikal/jenkins-argo.git --path ./ --dest-namespace default --dest-server https://kubernetes.default.svc
+                        ARGOCD_SERVER=$ARGOCD_SERVER argocd app create $APP_NAME --project default --repo https://github.com/rjhaikal/jenkins-argo.git --path ./ --dest-namespace default --dest-server https://kubernetes.default.svc --upsert
                         IMAGE_DIGEST=$(docker image inspect $IMAGE:latest -f '{{join .RepoDigests ","}}')
                         ## Customize image 
                         ARGOCD_SERVER=$ARGOCD_SERVER argocd --grpc-web app set $APP_NAME --kustomize-image $IMAGE_DIGEST
