@@ -19,10 +19,11 @@ pipeline {
         }
         stage ('Docker_Build') {
 
-            docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-            }
-            
             steps {
+
+                docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
+                }
+
                 // Build the docker image
                 sh'''
                     IMAGE="k8s-debian-test"
