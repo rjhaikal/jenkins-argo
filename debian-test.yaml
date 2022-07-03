@@ -1,0 +1,57 @@
+## ------------------- Debian Deployment ------------------- #
+
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  labels:
+    k8s-app: debian-test
+  name: debian-test
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: debian-test
+  template:
+    metadata:
+      labels:
+        k8s-app: debian-test
+    spec:
+      containers:
+      - name: debian-test
+        image: rjhaikal/k8s-debian-test:latest 
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        ports:
+        - containerPort: 80
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /
+            port: 80
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+
+---
+## ------------------- Debian Service ------------------- #
+
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    k8s-app: debian-test
+  name: debian-test
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+  type: LoadBalancer
+  selector:
+    k8s-app: debian-test
