@@ -21,8 +21,14 @@ pipeline {
             steps {
                 // Build the docker image
                 sh'''
+                    IMAGE="k8s-debian-test"
+                    
                     # Build the image
                     docker build . -t k8s-debian-test
+
+                    # Deploy image to Dockerhub
+                    docker tag $IMAGE:latest rjhaikal/$IMAGE:latest
+                    docker push rjhaikal/$IMAGE:latest
                 '''
             }
         }
@@ -35,9 +41,6 @@ pipeline {
                         APP_NAME="debian-test-k8s"
                         IMAGE="k8s-debian-test"
 
-                        # Deploy image to Dockerhub
-                        docker tag $IMAGE:latest rjhaikal/$IMAGE:latest
-                        docker push rjhaikal/$IMAGE:latest
                         IMAGE_DIGEST=$(docker image inspect rjhaikal/$IMAGE:latest -f '{{join .RepoDigests ","}}')
                         # Customize image 
                         ARGOCD_SERVER=$ARGOCD_SERVER argocd --grpc-web app set $APP_NAME --kustomize-image $IMAGE_DIGEST
