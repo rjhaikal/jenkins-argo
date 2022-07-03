@@ -38,7 +38,7 @@ pipeline {
         }
         stage ('Deploy_K8S') {
              steps {
-                     withCredentials([string(credentialsId: "argocd-deploy-role", variable: 'ARGOCD_AUTH_TOKEN')]) {
+                     // withCredentials([string(credentialsId: "argocd-deploy-role", variable: 'ARGOCD_AUTH_TOKEN')]) {
                         sh '''
                         argocd login --insecure 192.168.3.52 --auth-token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJwcm9qOmRlZmF1bHQ6amVua2lucy1kZXBsb3ktcm9sZSIsIm5iZiI6MTY1NjgyNzUyNiwiaWF0IjoxNjU2ODI3NTI2LCJqdGkiOiI1ZjcyZTJiMS0zZjQ5LTQxNjMtYWFiZi01NDAwZmRmNTA3MDcifQ.9HciKVLmvweUOM73t6j-UX0uhOLil9qXiADGhrYP0kk --username admin --password openstack
                         # IMAGE_DIGEST=$(docker image inspect $IMAGE:latest -f '{{join .RepoDigests ","}}')
