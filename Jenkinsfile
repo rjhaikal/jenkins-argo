@@ -18,26 +18,29 @@ pipeline {
             }
         }
         stage ('Docker_Build') {
-
             steps {
-
-                docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {
-                }
-
                 // Build the docker image
                 sh'''
                     IMAGE="k8s-debian-test"
 
                     # Build the image
-                    docker build . -t k8s-debian-test
-
-                    # Deploy image to Dockerhub
-                    docker tag $IMAGE:latest rjhaikal/$IMAGE:latest
-                    docker push rjhaikal/$IMAGE:latest
+                    docker build . -t rjhaikal/$IMAGE:latest
                 '''
             }
         }
-        
+        stage ('Docker_Push') {
+            steps {
+                    withCredentials([usernamePassword(credentialsId: 'dockerHub', passwordVariable: 'dockerHubPassword', usernameVariable: 'dockerHubUser')]) {
+                        sh'''
+                        IMAGE="k8s-debian-test"
+
+                        # 
+                        docker login -u ${env.dockerHubUser} -p ${env.dockerHubPassword}
+                        docker push  ${env.dockerHubUser}/$IMAGE:latest
+                        '''
+                    }
+            }
+        }
         stage ('Deploy_K8S') {
              steps {
                      withCredentials([string(credentialsId: "argocd-deploy-role", variable: 'ARGOCD_AUTH_TOKEN')]) {
