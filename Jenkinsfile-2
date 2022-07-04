@@ -5,6 +5,7 @@ pipeline {
     dockerImage = ''
     ARGOCD_SERVER="192.168.3.52"
     APP_NAME="debian-test-k8s"
+    ARGOCD_CREDS = credentials('argocd-credentials')
     }
     agent any
     stages {       
@@ -38,9 +39,8 @@ pipeline {
         }
         stage ('Deploy_K8S') {
              steps {
-                     // withCredentials([string(credentialsId: "argocd-deploy-role", variable: 'ARGOCD_AUTH_TOKEN')]) {
                         sh '''
-                        argocd login --insecure $ARGOCD_SERVER --username admin --password openstack
+                        argocd login --insecure $ARGOCD_SERVER --username ${ARGOCD_CREDS_USR} --password ${ARGOCD_CREDS_PSW}
                         ARGOCD_SERVER=$ARGOCD_SERVER argocd app create $APP_NAME --project default --repo https://github.com/rjhaikal/jenkins-argo.git --path ./ --dest-namespace default --dest-server https://kubernetes.default.svc --upsert
                         IMAGE_DIGEST=$(docker image inspect $IMAGE:latest -f '{{join .RepoDigests ","}}')
                         ## Customize image 
@@ -54,4 +54,3 @@ pipeline {
             }
         }
     }
-//}

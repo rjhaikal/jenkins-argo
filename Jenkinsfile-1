@@ -3,7 +3,7 @@ pipeline {
     IMAGE = "rjhaikal/k8s-debian-test"
     registryCredential = 'dockerhub'
     dockerImage = ''
-    ARGOCD_SERVER="argocd.bignetlab.com"
+    ARGOCD_SERVER="192.168.3.52"
     APP_NAME="debian-test-k8s"
     }
     agent any
@@ -40,6 +40,7 @@ pipeline {
              steps {
                      withCredentials([string(credentialsId: "argocd-deploy-role", variable: 'ARGOCD_AUTH_TOKEN')]) {
                         sh '''
+                        argocd login --insecure $ARGOCD_SERVER --username admin --password openstack
                         IMAGE_DIGEST=$(docker image inspect $IMAGE:latest -f '{{join .RepoDigests ","}}')
                         # Customize image 
                         ARGOCD_SERVER=$ARGOCD_SERVER argocd --grpc-web app set $APP_NAME --kustomize-image $IMAGE_DIGEST
