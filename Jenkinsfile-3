@@ -1,12 +1,11 @@
 pipeline {
   environment {
-    IMAGE = "core.harbor.bignetlab.com/k8s-devops-harbor/k8s-debian-test"
-    REGISTRY = "core.harbor.bignetlab.com"
-    HARBOR_NAMESPACE = "k8s-devops-harbor"
-    HARBOR_CREDS = credentials('harbor') 
+    IMAGE = "core.harbor.bignetlab.com/library/gl-dev"
+    registryCredential = 'harbor'
     dockerImage = ''
     ARGOCD_SERVER="192.168.3.52"
-    APP_NAME="debian-test-k8s"
+    APP_NAME="debian-test-k8s-gl"
+    HARBOR_CREDS = credentials('harbor')
     ARGOCD_CREDS = credentials('argocd-credentials')
     }
     agent any
@@ -14,22 +13,14 @@ pipeline {
         stage('Prepare') {
             steps {
                 checkout([$class: 'GitSCM',
-                branches: [[name: "origin/master"]],
+                branches: [[name: "origin/main"]],
                 doGenerateSubmoduleConfigurations: false,
                 submoduleCfg: [],
                 userRemoteConfigs: [[
-                    url: 'https://github.com/rjhaikal/jenkins-argo.git']]
+                    url: 'https://gitlab.com/gilangvperdana/jenkins-argocd.git']]
                 ])
             }
         }
-        stage('Docker_Login') {
-            steps {
-                 sh '''
-                 docker login $REGISTRY -u="${HARBOR_CREDS_USR}" -p="${HARBOR_CREDS_PSW}"
-                 '''
-          }
-        }
-
         stage('Docker_Build') {
           steps{
             script {
@@ -37,10 +28,17 @@ pipeline {
             }
           }
         }
+        stage('Docker_Login') {
+             steps {
+                        sh '''
+                        docker login https://core.harbor.bignetlab.com -u="${HARBOR_CREDS_USR}" -p="${HARBOR_CREDS_PSW}"
+                        '''
+               }
+        }
         stage('Docker_Push') {
           steps{
             script {
-              docker.withRegistry( REGISTRY, HARBOR_CREDS ) {
+              docker.withRegistry( 'https://core.harbor.bignetlab.com', registryCredential ) {
                 dockerImage.push("$BUILD_NUMBER")
                  dockerImage.push('latest')
               }
@@ -51,7 +49,7 @@ pipeline {
              steps {
                         sh '''
                         argocd login --insecure $ARGOCD_SERVER --username ${ARGOCD_CREDS_USR} --password ${ARGOCD_CREDS_PSW}
-                        ARGOCD_SERVER=$ARGOCD_SERVER argocd app create $APP_NAME --project default --repo https://github.com/rjhaikal/jenkins-argo.git --path ./ --dest-namespace default --dest-server https://kubernetes.default.svc --upsert
+                        ARGOCD_SERVER=$ARGOCD_SERVER argocd app create $APP_NAME --project default --repo https://gitlab.com/gilangvperdana/jenkins-argocd.git --path ./ --dest-namespace gl --dest-server https://kubernetes.default.svc --upsert
                         IMAGE_DIGEST=$(docker image inspect $IMAGE:latest -f '{{join .RepoDigests ","}}')
                         ## Customize image 
                         ARGOCD_SERVER=$ARGOCD_SERVER argocd --grpc-web app set $APP_NAME --kustomize-image $IMAGE_DIGEST
