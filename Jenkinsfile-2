@@ -2,6 +2,7 @@ pipeline {
   environment {
     IMAGE = "core.harbor.bignetlab.com/k8s-devops-harbor/k8s-debian-test"
     REGISTRY = "core.harbor.bignetlab.com"
+    registryCredential = 'harbor'
     HARBOR_NAMESPACE = "k8s-devops-harbor"
     HARBOR_CREDS = credentials('harbor') 
     dockerImage = ''
@@ -40,7 +41,7 @@ pipeline {
         stage('Docker_Push') {
           steps{
             script {
-              docker.withRegistry( REGISTRY, HARBOR_CREDS ) {
+              docker.withRegistry( REGISTRY, registryCredential ) {
                 dockerImage.push("$BUILD_NUMBER")
                  dockerImage.push('latest')
               }
