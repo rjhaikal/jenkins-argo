@@ -3,7 +3,6 @@ pipeline {
     IMAGE = "core.harbor.bignetlab.com/k8s-devops-harbor/k8s-debian-test"
     REGISTRY = "core.harbor.bignetlab.com"
     registryCredential = 'harbor'
-    HARBOR_NAMESPACE = "k8s-devops-harbor"
     HARBOR_CREDS = credentials('harbor') 
     dockerImage = ''
     ARGOCD_SERVER="192.168.3.52"
@@ -23,14 +22,6 @@ pipeline {
                 ])
             }
         }
-        stage('Docker_Login') {
-            steps {
-                 sh '''
-                 docker login $REGISTRY -u="${HARBOR_CREDS_USR}" -p="${HARBOR_CREDS_PSW}"
-                 '''
-          }
-        }
-
         stage('Docker_Build') {
           steps{
             script {
@@ -38,10 +29,17 @@ pipeline {
             }
           }
         }
+        stage('Docker_Login') {
+          steps {
+                 sh '''
+                 docker login $REGISTRY -u="${HARBOR_CREDS_USR}" -p="${HARBOR_CREDS_PSW}"
+                 '''
+          }
+        }
         stage('Docker_Push') {
           steps{
             script {
-              docker.withRegistry( 'core.harbor.bignetlab.com', registryCredential ) {
+              docker.withRegistry( 'https://core.harbor.bignetlab.com', registryCredential ) {
                 dockerImage.push("$BUILD_NUMBER")
                  dockerImage.push('latest')
               }
