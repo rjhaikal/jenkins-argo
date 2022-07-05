@@ -1,9 +1,9 @@
 pipeline {
   environment {
-    IMAGE = "rjhaikal/k8s-debian-test"
+    IMAGE = "core.harbor.bignetlab.com/k8s-devops-harbor/k8s-debian-test"
     REGISTRY = "core.harbor.bignetlab.com"
-    HARBOR_NAMESPACE = "k8s-devops-harbor"
-    registryCredential = ''
+    registryCredential = 'harbor'
+    HARBOR_CREDS = credentials('harbor') 
     dockerImage = ''
     ARGOCD_SERVER="192.168.3.52"
     APP_NAME="debian-test-k8s"
@@ -29,14 +29,28 @@ pipeline {
             }
           }
         }
+        stage('Docker_Login') {
+          steps {
+                 sh '''
+                 docker login $REGISTRY -u="${HARBOR_CREDS_USR}" -p="${HARBOR_CREDS_PSW}"
+                 '''
+          }
+        }
         stage('Docker_Push') {
           steps{
             script {
-              docker.withRegistry( 'https://registry.hub.docker.com', registryCredential ) {
+              docker.withRegistry( 'https://core.harbor.bignetlab.com', registryCredential ) {
                 dockerImage.push("$BUILD_NUMBER")
                  dockerImage.push('latest')
               }
             }
+          }
+        }
+        stage('Scan Image') {
+          steps{
+            sh '''
+            trivy image --no-progress $IMAGE 
+            '''
           }
         }
         stage ('Deploy_K8S') {
