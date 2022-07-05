@@ -41,7 +41,7 @@ pipeline {
         stage('Docker_Push') {
           steps{
             script {
-              docker.withRegistry( REGISTRY, registryCredential ) {
+              docker.withRegistry( 'core.harbor.bignetlab.com', registryCredential ) {
                 dockerImage.push("$BUILD_NUMBER")
                  dockerImage.push('latest')
               }
